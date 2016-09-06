@@ -162,13 +162,15 @@ valpcadata&lt;-predict(pcamodel, pmlval[,-53]) # Create principal components for
 </div>
 <div id="set-tuning-parameters-for-cross-validation" class="section level2">
 <h2>Set Tuning Parameters for Cross Validation</h2>
+<p>TrainControl was used to set the CV setting. I used Repeated K fold Cross validation. K = 3 and repeat =3. Higher values were utilized , but with traning time exceeding 1 hour, a lower values were utilized.</p>
 <pre class="r"><code>fitcontrol&lt;-trainControl(method=&quot;repeatedcv&quot;, number = 3, repeats =3) # Setting control parameters for the SVM training; 3 Fold, repeated cross validation</code></pre>
 </div>
 <div id="training-rbf-kernel-svm-parameters" class="section level2">
 <h2>Training RBF Kernel SVM Parameters</h2>
-<pre class="r"><code>fitcontrol&lt;-trainControl(method=&quot;repeatedcv&quot;, number = 3, repeats =3) # Setting control parameters for the SVM training; 3 Fold, repeated cross validation
-svm.tune&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmRadial&quot;,tuneLength =9, trControl=fitcontrol)#best parameters can be identified by svm.tune$best 
-grid&lt;-expand.grid(sigma = c(0.01308048), C= c(32)) # select best tuning parameters for the SVM
+<p>First SVM is run with RBF kernel to determine the possible values of ‘C’ &amp; ‘Sigma’ parameters.The best values were then used to run the model and determine the accuracy</p>
+<pre class="r"><code>svm.tune&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmRadial&quot;,tuneLength =9, trControl=fitcontrol)#best parameters can be identified by svm.tune$best </code></pre>
+<pre><code>## Loading required package: kernlab</code></pre>
+<pre class="r"><code>grid&lt;-expand.grid(sigma = c(0.01308048), C= c(32)) # select best tuning parameters for the SVM
 svm.tune2&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmRadial&quot;,tuneGrid=grid, trControl=fitcontrol)
 
 ## CV In-sample Accuracy (including all Principal Components: 98%</code></pre>
@@ -176,9 +178,8 @@ svm.tune2&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmRadial&
 <div id="training-svm-linear-kernel-parameters" class="section level2">
 <h2>Training SVM Linear Kernel Parameters</h2>
 <p>Linear Kernel is much simpler with C = 1. The training time with CV was much shorter when compared to the RBF Kernel , but accuracy was much lower. Since, training time was lower, the outout</p>
-<pre class="r"><code>svmlinear.tune&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmLinear&quot;,tuneLength =9, trControl=fitcontrol) # Use the Linear Kernel for the SVM vector</code></pre>
-<pre><code>## Loading required package: kernlab</code></pre>
-<pre class="r"><code>svmlinear.tune</code></pre>
+<pre class="r"><code>svmlinear.tune&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmLinear&quot;,tuneLength =9, trControl=fitcontrol) # Use the Linear Kernel for the SVM vector
+svmlinear.tune</code></pre>
 <pre><code>## Support Vector Machines with Linear Kernel 
 ## 
 ## 15699 samples
@@ -187,11 +188,11 @@ svm.tune2&lt;-train(x=trainpcadata, y=pmltrain$classe, method = &quot;svmRadial&
 ## 
 ## No pre-processing
 ## Resampling: Cross-Validated (3 fold, repeated 3 times) 
-## Summary of sample sizes: 10466, 10465, 10467, 10466, 10467, 10465, ... 
+## Summary of sample sizes: 10466, 10466, 10466, 10466, 10467, 10465, ... 
 ## Resampling results
 ## 
-##   Accuracy  Kappa      Accuracy SD  Kappa SD   
-##   0.795019  0.7394458  0.002582538  0.003313866
+##   Accuracy   Kappa      Accuracy SD  Kappa SD   
+##   0.7952093  0.7396566  0.004832401  0.006213651
 ## 
 ## Tuning parameter 'C' was held constant at a value of 1
 ## </code></pre>
