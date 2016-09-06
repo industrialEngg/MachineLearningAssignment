@@ -1,0 +1,29 @@
+set.seed(12331)
+pml1<-read.csv(sep=",", header=TRUE, "pml-training2.csv")
+intrain<-createDataPartition(pml1$classe, list=FALSE,p=0.8)
+pmlval<-pml1[-intrain,] ## create validation set
+
+pmltemp<-pml1[intrain,] ## Use remaining data to create Training & Test Data
+pmltrain<-pmltemp
+
+
+# Dimension Reduction using Principal Component Analysis#
+
+pcamodel<-preProcess(pmltrain[,-53], method="pca", pcaComp=52) # Run principal components analysis
+trainpcadata<-predict(pcamodel, pmltrain[,-53]) # Create principal components for training data
+valpcadata<-predict(pcamodel, pmlval[,-53]) # Create principal components for training data
+
+fitcontrol<-trainControl(method="repeatedcv", number = 3, repeats =3) # Setting control parameters for the SVM training; 3 Fold, repeated cross validation
+
+svm.tune<-train(x=trainpcadata, y=pmltrain$classe, method = "svmRadial",tuneLength =9, trControl=fitcontrol)#best parameters can be identified by svm.tune$best 
+grid<-expand.grid(sigma = c(0.01308048), C= c(32)) # select best tuning parameters for the SVM
+svm.tune2<-train(x=trainpcadata, y=pmltrain$classe, method = "svmRadial",tuneGrid=grid, trControl=fitcontrol)
+
+svmlinear.tune<-train(x=trainpcadata, y=pmltrain$classe, method = "svmLinear",tuneLength =9, trControl=fitcontrol) # Use the Linear Kernel for the SVM vector
+
+
+#### This section of the code was used for the Quiz 5###
+quiztest<-read.csv(header=TRUE, sep=",", "TestQ5data.csv")
+quizpcadata<-predict(pcamodel, quiztest[,])
+quizpred<-predict(svm1, newdata=quizpcadata)
+quizpred
